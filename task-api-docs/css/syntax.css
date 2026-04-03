@@ -1,0 +1,17 @@
+/* =========================================================
+   SYNTAX.CSS — JSON response highlighting & PHP code colors
+   ========================================================= */
+
+/* ── JSON Response Tokens ───────────────────────────────── */
+.json-key  { color: var(--c-cyan);   }
+.json-str  { color: var(--c-green);  }
+.json-num  { color: var(--c-amber);  }
+.json-bool { color: var(--c-purple); }
+.json-null { color: var(--c-muted);  }
+
+/* ── PHP / Migration Code Tokens ───────────────────────── */
+.kw  { color: var(--c-purple); }   /* keywords: return, new, function, void, etc. */
+.fn  { color: var(--c-blue);   }   /* function names */
+.str { color: var(--c-green);  }   /* strings */
+.cm  { color: var(--c-muted); font-style: italic; }  /* comments */
+.cls { color: var(--c-amber);  }   /* class names */

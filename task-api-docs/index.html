@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Management API — Laravel 11</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/syntax.css" />
+</head>
+<body>
+
+  <div class="shell">
+
+    <!-- ===== SIDEBAR ===== -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-tag">LARAVEL 11</div>
+        <h1>Task Management API</h1>
+        <p>v1.0 &nbsp;·&nbsp; REST &nbsp;·&nbsp; MySQL</p>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" data-section="setup">
+          <span class="nav-icon">⚙</span> Setup &amp; Migration
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-label">Endpoints</div>
+        <div class="nav-item" data-section="ep-list">
+          <span class="method-badge badge-get">GET</span>/tasks
+        </div>
+        <div class="nav-item" data-section="ep-create">
+          <span class="method-badge badge-post">POST</span>/tasks
+        </div>
+        <div class="nav-item" data-section="ep-status">
+          <span class="method-badge badge-patch">PATCH</span>/{id}/status
+        </div>
+        <div class="nav-item" data-section="ep-delete">
+          <span class="method-badge badge-delete">DELETE</span>/{id}
+        </div>
+        <div class="nav-item" data-section="ep-report">
+          <span class="method-badge badge-get">GET</span>/report
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="nav-label">Base URL</div>
+        <div class="base-url">
+          http://localhost:8000<br>/api
+        </div>
+      </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="main" id="main-content">
+
+      <!-- SETUP SECTION -->
+      <div id="section-setup" class="section">
+
+        <div class="hero">
+          <div class="hero-glow"></div>
+          <div class="hero-top">
+            <span class="hero-version">Laravel 11 · PHP 8.3</span>
+          </div>
+          <h2>Task Management API</h2>
+          <p>A RESTful API for managing tasks with priority enforcement, status progression rules, deletion guards, and daily reporting. Built with Eloquent ORM, Form Requests, and MySQL.</p>
+          <div class="stats">
+            <div class="stat"><div class="stat-n">5</div><div class="stat-l">Endpoints</div></div>
+            <div class="stat"><div class="stat-n">3</div><div class="stat-l">Priority levels</div></div>
+            <div class="stat"><div class="stat-n">3</div><div class="stat-l">Status states</div></div>
+            <div class="stat"><div class="stat-n">MySQL</div><div class="stat-l">Database</div></div>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-header">
+            <div class="code-dots">
+              <span class="dot d1"></span>
+              <span class="dot d2"></span>
+              <span class="dot d3"></span>
+            </div>
+            <span class="code-filename">create_tasks_table.php</span>
+            <span class="code-lang">PHP · Migration</span>
+          </div>
+          <div class="code-content" id="migration-code"></div>
+        </div>
+
+        <div class="setup-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h3>Create project</h3>
+              <p><code class="ic">composer create-project laravel/laravel task-management-api "^11.0"</code></p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h3>Configure .env</h3>
+              <p>Set <code class="ic">DB_CONNECTION=mysql</code>, <code class="ic">DB_DATABASE</code>, <code class="ic">DB_USERNAME</code>, <code class="ic">DB_PASSWORD</code></p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h3>Scaffold API routes</h3>
+              <p><code class="ic">php artisan install:api</code> — creates <code class="ic">routes/api.php</code> (new in Laravel 11)</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <h3>Run migrations &amp; seed</h3>
+              <p><code class="ic">php artisan migrate</code> then <code class="ic">php artisan db:seed --class=TaskSeeder</code></p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <h3>Serve locally</h3>
+              <p><code class="ic">php artisan serve</code> — API available at <code class="ic">http://127.0.0.1:8000/api</code></p>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /section-setup -->
+
+      <!-- LIST TASKS SECTION -->
+      <div id="section-ep-list" class="section" style="display:none">
+        <div class="endpoint-card active-section">
+          <div class="ep-header" data-ep="list">
+            <span class="ep-method method-get">GET</span>
+            <span class="ep-path">/api/tasks</span>
+            <span class="ep-desc">List all tasks</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body open" id="ep-body-list">
+            <div class="tabs" data-group="list">
+              <div class="tab active" data-target="try-list">Try it</div>
+              <div class="tab" data-target="rules-list">Rules</div>
+            </div>
+            <div id="try-list" class="tab-panel">
+              <div class="field-group">
+                <div class="field">
+                  <label>Status filter <span class="optional">(optional)</span></label>
+                  <select id="list-status">
+                    <option value="">— All statuses —</option>
+                    <option>pending</option>
+                    <option>in_progress</option>
+                    <option>done</option>
+                  </select>
+                </div>
+              </div>
+              <button class="run-btn" id="btn-list">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Send Request
+              </button>
+              <div class="response-box" id="list-response" style="display:none">
+                <div class="response-header" id="list-resp-header"></div>
+                <div class="response-body" id="list-resp-body"></div>
+              </div>
+            </div>
+            <div id="rules-list" class="tab-panel" style="display:none">
+              <div class="rules">
+                <div class="rule"><span class="rule-arrow">→</span>Sorted by priority: high → medium → low using MySQL <code class="ic">FIELD()</code></div>
+                <div class="rule"><span class="rule-arrow">→</span>Then sorted by <code class="ic">due_date</code> ascending within each priority group</div>
+                <div class="rule"><span class="rule-arrow">→</span>Optional <code class="ic">?status=pending|in_progress|done</code> query parameter</div>
+                <div class="rule"><span class="rule-arrow">→</span>Returns meaningful JSON message when no tasks exist</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CREATE TASK SECTION -->
+      <div id="section-ep-create" class="section" style="display:none">
+        <div class="endpoint-card active-section">
+          <div class="ep-header" data-ep="create">
+            <span class="ep-method method-post">POST</span>
+            <span class="ep-path">/api/tasks</span>
+            <span class="ep-desc">Create a new task</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body open" id="ep-body-create">
+            <div class="tabs" data-group="create">
+              <div class="tab active" data-target="try-create">Try it</div>
+              <div class="tab" data-target="schema-create">Schema</div>
+              <div class="tab" data-target="rules-create">Rules</div>
+            </div>
+            <div id="try-create" class="tab-panel">
+              <div class="field-group">
+                <div class="field">
+                  <label>Title <span class="required-star">*</span></label>
+                  <input id="c-title" type="text" placeholder="e.g. Fix login bug" />
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label>Due Date <span class="required-star">*</span></label>
+                    <input id="c-date" type="date" />
+                  </div>
+                  <div class="field">
+                    <label>Priority <span class="required-star">*</span></label>
+                    <select id="c-priority">
+                      <option value="">— Select —</option>
+                      <option>low</option>
+                      <option>medium</option>
+                      <option>high</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <button class="run-btn" id="btn-create">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Send Request
+              </button>
+              <div class="response-box" id="create-response" style="display:none">
+                <div class="response-header" id="create-resp-header"></div>
+                <div class="response-body" id="create-resp-body"></div>
+              </div>
+            </div>
+            <div id="schema-create" class="tab-panel" style="display:none">
+              <table class="schema-table">
+                <thead>
+                  <tr><th>Field</th><th>Type</th><th>Required</th><th>Rules</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>title</td>
+                    <td><span class="type-pill">string</span></td>
+                    <td><span class="req-dot">•</span> yes</td>
+                    <td>Max 255 chars. Must be unique per due_date.</td>
+                  </tr>
+                  <tr>
+                    <td>due_date</td>
+                    <td><span class="type-pill">date</span></td>
+                    <td><span class="req-dot">•</span> yes</td>
+                    <td>Format: YYYY-MM-DD. Must be today or future.</td>
+                  </tr>
+                  <tr>
+                    <td>priority</td>
+                    <td><span class="type-pill">enum</span></td>
+                    <td><span class="req-dot">•</span> yes</td>
+                    <td>One of: low, medium, high</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="rules-create" class="tab-panel" style="display:none">
+              <div class="rules">
+                <div class="rule"><span class="rule-arrow">→</span>title + due_date must be unique (enforced at DB AND validation level)</div>
+                <div class="rule"><span class="rule-arrow">→</span>due_date must be today or in the future (<code class="ic">after_or_equal:today</code>)</div>
+                <div class="rule"><span class="rule-arrow">→</span>priority must be one of: low, medium, high</div>
+                <div class="rule"><span class="rule-arrow">→</span>status is automatically set to <code class="ic">pending</code> on creation</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPDATE STATUS SECTION -->
+      <div id="section-ep-status" class="section" style="display:none">
+        <div class="endpoint-card active-section">
+          <div class="ep-header" data-ep="status">
+            <span class="ep-method method-patch">PATCH</span>
+            <span class="ep-path">/api/tasks/{id}/status</span>
+            <span class="ep-desc">Progress task status</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body open" id="ep-body-status">
+            <div class="tabs" data-group="status">
+              <div class="tab active" data-target="try-status">Try it</div>
+              <div class="tab" data-target="rules-status">Flow</div>
+            </div>
+            <div id="try-status" class="tab-panel">
+              <div class="status-flow-banner">
+                <div class="flow-label">STATUS FLOW</div>
+                <div class="flow-steps">
+                  <span class="flow-step st-pending">pending</span>
+                  <span class="flow-arrow">→</span>
+                  <span class="flow-step st-in_progress">in_progress</span>
+                  <span class="flow-arrow">→</span>
+                  <span class="flow-step st-done">done</span>
+                </div>
+              </div>
+              <div class="field-group">
+                <div class="field-row">
+                  <div class="field">
+                    <label>Task ID <span class="required-star">*</span></label>
+                    <input id="s-id" type="number" placeholder="e.g. 1" />
+                  </div>
+                  <div class="field">
+                    <label>New Status <span class="required-star">*</span></label>
+                    <select id="s-status">
+                      <option value="">— Select —</option>
+                      <option>in_progress</option>
+                      <option>done</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <button class="run-btn" id="btn-status">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Send Request
+              </button>
+              <div class="response-box" id="status-response" style="display:none">
+                <div class="response-header" id="status-resp-header"></div>
+                <div class="response-body" id="status-resp-body"></div>
+              </div>
+            </div>
+            <div id="rules-status" class="tab-panel" style="display:none">
+              <div class="rules">
+                <div class="rule"><span class="rule-arrow">→</span>Status can ONLY progress forward: pending → in_progress → done</div>
+                <div class="rule"><span class="rule-arrow">→</span>Cannot skip a step (e.g. pending → done is rejected)</div>
+                <div class="rule"><span class="rule-arrow">→</span>Cannot revert (e.g. done → pending is rejected)</div>
+                <div class="rule"><span class="rule-arrow">→</span>Once done, no further status changes are possible</div>
+                <div class="rule"><span class="rule-arrow">→</span>Returns 422 with a clear message on invalid transitions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELETE SECTION -->
+      <div id="section-ep-delete" class="section" style="display:none">
+        <div class="endpoint-card active-section">
+          <div class="ep-header" data-ep="delete">
+            <span class="ep-method method-delete">DELETE</span>
+            <span class="ep-path">/api/tasks/{id}</span>
+            <span class="ep-desc">Delete a done task</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body open" id="ep-body-delete">
+            <div class="tabs" data-group="delete">
+              <div class="tab active" data-target="try-delete">Try it</div>
+              <div class="tab" data-target="rules-delete">Rules</div>
+            </div>
+            <div id="try-delete" class="tab-panel">
+              <div class="field-group">
+                <div class="field">
+                  <label>Task ID <span class="required-star">*</span></label>
+                  <input id="d-id" type="number" placeholder="e.g. 4" />
+                </div>
+              </div>
+              <div class="done-tasks-hint">Click a task below to auto-fill its ID</div>
+              <div class="task-list" id="done-tasks-list"></div>
+              <button class="run-btn btn-danger" id="btn-delete" style="margin-top:16px">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6M14 11v6M9 6V4h6v2"/>
+                </svg>
+                Delete Task
+              </button>
+              <div class="response-box" id="delete-response" style="display:none">
+                <div class="response-header" id="delete-resp-header"></div>
+                <div class="response-body" id="delete-resp-body"></div>
+              </div>
+            </div>
+            <div id="rules-delete" class="tab-panel" style="display:none">
+              <div class="rules">
+                <div class="rule"><span class="rule-arrow">→</span>Only tasks with status <strong class="text-green">done</strong> can be deleted</div>
+                <div class="rule"><span class="rule-arrow">→</span>Attempting to delete a pending or in_progress task returns <code class="ic text-red">403 Forbidden</code></div>
+                <div class="rule"><span class="rule-arrow">→</span>Non-existent task returns <code class="ic text-amber">404 Not Found</code></div>
+                <div class="rule"><span class="rule-arrow">→</span>Returns 200 with success message on deletion</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORT SECTION -->
+      <div id="section-ep-report" class="section" style="display:none">
+        <div class="endpoint-card active-section">
+          <div class="ep-header" data-ep="report">
+            <span class="ep-method method-get">GET</span>
+            <span class="ep-path">/api/tasks/report</span>
+            <span class="ep-desc">Daily task report</span>
+            <span class="ep-chevron">▾</span>
+          </div>
+          <div class="ep-body open" id="ep-body-report">
+            <div class="tabs" data-group="report">
+              <div class="tab active" data-target="try-report">Try it</div>
+              <div class="tab" data-target="rules-report">Rules</div>
+            </div>
+            <div id="try-report" class="tab-panel">
+              <div class="field-group">
+                <div class="field">
+                  <label>Date <span class="required-star">*</span></label>
+                  <input id="r-date" type="date" />
+                </div>
+              </div>
+              <button class="run-btn" id="btn-report">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Generate Report
+              </button>
+              <div id="report-visual" style="display:none; margin-top:20px">
+                <div class="report-date-label" id="report-date-label"></div>
+                <div class="report-grid" id="report-grid"></div>
+              </div>
+              <div class="response-box" id="report-response" style="display:none; margin-top:16px">
+                <div class="response-header" id="report-resp-header"></div>
+                <div class="response-body" id="report-resp-body"></div>
+              </div>
+            </div>
+            <div id="rules-report" class="tab-panel" style="display:none">
+              <div class="rules">
+                <div class="rule"><span class="rule-arrow">→</span>Requires <code class="ic">?date=YYYY-MM-DD</code> query parameter</div>
+                <div class="rule"><span class="rule-arrow">→</span>Returns counts grouped by priority (high/medium/low) × status (pending/in_progress/done)</div>
+                <div class="rule"><span class="rule-arrow">→</span>Filters tasks by <code class="ic">due_date</code> matching the given date</div>
+                <div class="rule"><span class="rule-arrow">→</span>Always returns all 9 cells even if count is 0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main><!-- /main -->
+  </div><!-- /shell -->
+
+  <script src="js/store.js"></script>
+  <script src="js/highlight.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

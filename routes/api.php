@@ -10,6 +10,7 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/tasks/report', [TaskController::class, 'report']);
 
+Route::get('/tasks',                  [TaskController::class, 'show']);
 Route::get('/tasks',                  [TaskController::class, 'index']);
 Route::post('/tasks',                 [TaskController::class, 'store']);
 Route::patch('/tasks/{id}/status',    [TaskController::class, 'updateStatus']);

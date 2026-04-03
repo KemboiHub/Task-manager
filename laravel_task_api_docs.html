@@ -1,0 +1,805 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@400;500;600&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --c-bg:#0f1117;--c-surface:#181c27;--c-card:#1e2333;--c-border:#2a3044;
+  --c-green:#22c55e;--c-green-dim:#16a34a;--c-red:#f43f5e;--c-amber:#f59e0b;
+  --c-blue:#3b82f6;--c-purple:#a78bfa;--c-cyan:#22d3ee;
+  --c-text:#e2e8f0;--c-muted:#64748b;--c-subtle:#94a3b8;
+  --font-ui:'Sora',sans-serif;--font-mono:'JetBrains Mono',monospace;
+  --radius:8px;--radius-lg:12px;
+}
+body{background:var(--c-bg);color:var(--c-text);font-family:var(--font-ui);font-size:14px;min-height:100vh}
+
+.shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{background:var(--c-surface);border-right:1px solid var(--c-border);padding:24px 0;display:flex;flex-direction:column;gap:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-logo{padding:0 20px 20px;border-bottom:1px solid var(--c-border);margin-bottom:12px}
+.sidebar-logo .logo-tag{font-size:10px;font-family:var(--font-mono);color:var(--c-green);letter-spacing:2px;margin-bottom:4px}
+.sidebar-logo h1{font-size:15px;font-weight:600;color:var(--c-text)}
+.sidebar-logo p{font-size:11px;color:var(--c-muted);margin-top:2px}
+
+.nav-group{padding:8px 0}
+.nav-label{font-size:10px;letter-spacing:1.5px;color:var(--c-muted);padding:0 20px 6px;font-weight:500}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 20px;cursor:pointer;transition:background .15s;font-size:13px;color:var(--c-subtle);border-left:2px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.04);color:var(--c-text)}
+.nav-item.active{background:rgba(59,130,246,.08);color:var(--c-blue);border-left-color:var(--c-blue)}
+.nav-item .method-badge{font-family:var(--font-mono);font-size:9px;padding:2px 6px;border-radius:4px;font-weight:500;min-width:44px;text-align:center}
+.badge-post{background:rgba(34,197,94,.15);color:var(--c-green)}
+.badge-get{background:rgba(59,130,246,.15);color:var(--c-blue)}
+.badge-patch{background:rgba(245,158,11,.15);color:var(--c-amber)}
+.badge-delete{background:rgba(244,63,94,.15);color:var(--c-red)}
+
+/* MAIN */
+.main{padding:32px 40px;max-width:900px}
+
+/* HERO */
+.hero{margin-bottom:40px;padding:28px 32px;background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(59,130,246,.12),transparent 70%);pointer-events:none}
+.hero-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.hero-version{font-family:var(--font-mono);font-size:11px;color:var(--c-green);background:rgba(34,197,94,.1);padding:3px 10px;border-radius:20px;border:1px solid rgba(34,197,94,.2)}
+.hero h2{font-size:22px;font-weight:600;margin-bottom:6px}
+.hero p{color:var(--c-subtle);font-size:13px;line-height:1.7;max-width:540px}
+.stats{display:flex;gap:24px;margin-top:20px;padding-top:20px;border-top:1px solid var(--c-border)}
+.stat{text-align:center}
+.stat-n{font-size:24px;font-weight:600;color:var(--c-text);font-family:var(--font-mono)}
+.stat-l{font-size:11px;color:var(--c-muted);margin-top:2px}
+
+/* ENDPOINT CARD */
+.endpoint-card{background:var(--c-card);border:1px solid var(--c-border);border-radius:var(--radius-lg);margin-bottom:24px;overflow:hidden;transition:border-color .2s}
+.endpoint-card.active-section{border-color:var(--c-blue)}
+.ep-header{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;border-bottom:1px solid var(--c-border)}
+.ep-header:hover{background:rgba(255,255,255,.02)}
+.ep-method{font-family:var(--font-mono);font-size:11px;font-weight:500;padding:4px 10px;border-radius:6px;min-width:56px;text-align:center}
+.ep-path{font-family:var(--font-mono);font-size:13px;color:var(--c-text)}
+.ep-desc{font-size:12px;color:var(--c-muted);margin-left:auto}
+.ep-chevron{color:var(--c-muted);transition:transform .2s;margin-left:8px;font-size:16px}
+.ep-body{display:none;padding:20px}
+.ep-body.open{display:block}
+
+/* TABS */
+.tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:1px solid var(--c-border)}
+.tab{padding:8px 16px;cursor:pointer;font-size:12px;color:var(--c-muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab:hover{color:var(--c-text)}
+.tab.active{color:var(--c-blue);border-bottom-color:var(--c-blue)}
+
+/* FORM */
+.field-group{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;color:var(--c-subtle);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.field input,.field select{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);padding:8px 12px;color:var(--c-text);font-family:var(--font-ui);font-size:13px;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus{border-color:var(--c-blue)}
+.field input::placeholder{color:var(--c-muted)}
+.field select option{background:var(--c-card)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.run-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;background:var(--c-blue);color:#fff;border:none;border-radius:var(--radius);font-family:var(--font-ui);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.run-btn:hover{background:#2563eb;transform:translateY(-1px)}
+.run-btn:active{transform:translateY(0)}
+.run-btn.loading{opacity:.7;pointer-events:none}
+.run-btn svg{animation:none}
+.run-btn.loading svg{animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* RESPONSE */
+.response-box{margin-top:20px;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);overflow:hidden}
+.response-header{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--c-border);font-size:12px}
+.status-dot{width:8px;height:8px;border-radius:50%}
+.dot-green{background:var(--c-green)}
+.dot-red{background:var(--c-red)}
+.dot-amber{background:var(--c-amber)}
+.status-code{font-family:var(--font-mono);font-weight:500}
+.status-2xx{color:var(--c-green)}
+.status-4xx{color:var(--c-red)}
+.copy-btn{margin-left:auto;font-size:11px;color:var(--c-muted);background:none;border:1px solid var(--c-border);padding:3px 10px;border-radius:5px;cursor:pointer;font-family:var(--font-ui);transition:all .15s}
+.copy-btn:hover{color:var(--c-text);border-color:var(--c-subtle)}
+.response-body{padding:16px;font-family:var(--font-mono);font-size:12px;line-height:1.7;white-space:pre-wrap;overflow-x:auto;max-height:320px;overflow-y:auto}
+.json-key{color:var(--c-cyan)}
+.json-str{color:var(--c-green)}
+.json-num{color:var(--c-amber)}
+.json-bool{color:var(--c-purple)}
+.json-null{color:var(--c-muted)}
+
+/* RULES */
+.rules{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.rule{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--c-subtle);line-height:1.5}
+.rule-icon{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--c-amber)}
+
+/* SCHEMA TABLE */
+.schema-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px}
+.schema-table th{text-align:left;padding:8px 12px;color:var(--c-muted);font-size:10px;letter-spacing:1px;border-bottom:1px solid var(--c-border);font-weight:500}
+.schema-table td{padding:8px 12px;border-bottom:1px solid rgba(42,48,68,.5);color:var(--c-subtle);vertical-align:top}
+.schema-table td:first-child{font-family:var(--font-mono);font-size:11px;color:var(--c-text)}
+.type-pill{font-family:var(--font-mono);font-size:10px;padding:2px 8px;border-radius:4px;background:rgba(167,139,250,.1);color:var(--c-purple)}
+.required-dot{color:var(--c-red);font-size:16px;line-height:1}
+
+/* TASK LIST */
+.task-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:200px;overflow-y:auto}
+.task-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--c-surface);border-radius:var(--radius);border:1px solid var(--c-border);font-size:12px}
+.task-row .priority-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pr-high{background:var(--c-red)}
+.pr-medium{background:var(--c-amber)}
+.pr-low{background:var(--c-green)}
+.task-title{flex:1;color:var(--c-text);font-family:var(--font-mono)}
+.task-status{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
+.st-pending{background:rgba(245,158,11,.15);color:var(--c-amber)}
+.st-in_progress{background:rgba(59,130,246,.15);color:var(--c-blue)}
+.st-done{background:rgba(34,197,94,.15);color:var(--c-green)}
+.task-date{color:var(--c-muted);font-size:11px;font-family:var(--font-mono)}
+
+/* MIGRATION CODE */
+.code-block{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px}
+.code-header{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--c-border);font-size:11px;color:var(--c-muted)}
+.code-dots{display:flex;gap:5px}
+.dot{width:10px;height:10px;border-radius:50%}
+.d1{background:#ff5f57}.d2{background:#febc2e}.d3{background:#28c840}
+.code-lang{margin-left:auto;font-family:var(--font-mono);font-size:10px;color:var(--c-muted)}
+.code-content{padding:16px;font-family:var(--font-mono);font-size:12px;line-height:1.8;overflow-x:auto}
+.kw{color:var(--c-purple)}
+.fn{color:var(--c-blue)}
+.str{color:var(--c-green)}
+.cm{color:var(--c-muted);font-style:italic}
+.cls{color:var(--c-amber)}
+
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.report-cell{background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--radius);padding:14px;text-align:center}
+.report-cell .priority-label{font-size:10px;letter-spacing:1px;font-weight:500;margin-bottom:10px;text-transform:uppercase}
+.report-cell .counts{display:flex;flex-direction:column;gap:6px}
+.count-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.count-val{font-family:var(--font-mono);font-weight:500}
+
+/* SETUP STEPS */
+.setup-steps{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:16px;padding-bottom:24px;position:relative}
+.step:not(:last-child)::before{content:'';position:absolute;left:15px;top:32px;bottom:0;width:1px;background:var(--c-border)}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--c-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.step-content h3{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--c-text)}
+.step-content p{font-size:12px;color:var(--c-subtle);line-height:1.6}
+.inline-code{font-family:var(--font-mono);font-size:11px;background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;color:var(--c-cyan)}
+
+.empty-state{padding:24px;text-align:center;color:var(--c-muted);font-size:12px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--c-border);border-radius:3px}
+</style>
+
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-tag">LARAVEL 11</div>
+      <h1>Task Management API</h1>
+      <p>v1.0 &nbsp;·&nbsp; REST &nbsp;·&nbsp; MySQL</p>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Overview</div>
+      <div class="nav-item active" data-section="setup">
+        <span style="font-size:14px">⚙</span> Setup & Migration
+      </div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">Endpoints</div>
+      <div class="nav-item" data-section="ep-list">
+        <span class="method-badge badge-get">GET</span>/tasks
+      </div>
+      <div class="nav-item" data-section="ep-create">
+        <span class="method-badge badge-post">POST</span>/tasks
+      </div>
+      <div class="nav-item" data-section="ep-status">
+        <span class="method-badge badge-patch">PATCH</span>/{id}/status
+      </div>
+      <div class="nav-item" data-section="ep-delete">
+        <span class="method-badge badge-delete">DELETE</span>/{id}
+      </div>
+      <div class="nav-item" data-section="ep-report">
+        <span class="method-badge badge-get">GET</span>/report
+      </div>
+    </div>
+    <div class="nav-group" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--c-border)">
+      <div class="nav-label">Base URL</div>
+      <div style="padding:0 20px;font-family:var(--font-mono);font-size:11px;color:var(--c-cyan);line-height:1.6">
+        http://localhost:8000<br>/api
+      </div>
+    </div>
+  </nav>
+
+  <main class="main" id="main-content">
+
+    <!-- ===== SETUP ===== -->
+    <div id="section-setup">
+      <div class="hero">
+        <div class="hero-top">
+          <span class="hero-version">Laravel 11 · PHP 8.3</span>
+        </div>
+        <h2>Task Management API</h2>
+        <p>A RESTful API for managing tasks with priority enforcement, status progression rules, deletion guards, and daily reporting. Built with Eloquent ORM, Form Requests, and MySQL.</p>
+        <div class="stats">
+          <div class="stat"><div class="stat-n">5</div><div class="stat-l">Endpoints</div></div>
+          <div class="stat"><div class="stat-n">3</div><div class="stat-l">Priority levels</div></div>
+          <div class="stat"><div class="stat-n">3</div><div class="stat-l">Status states</div></div>
+          <div class="stat"><div class="stat-n">MySQL</div><div class="stat-l">Database</div></div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span></div>
+          create_tasks_table.php
+          <span class="code-lang">PHP · Migration</span>
+        </div>
+        <div class="code-content"><span class="kw">return new class extends</span> <span class="cls">Migration</span> {
+  <span class="kw">public function</span> <span class="fn">up</span>(): <span class="kw">void</span> {
+    <span class="cls">Schema</span>::<span class="fn">create</span>(<span class="str">'tasks'</span>, <span class="kw">function</span> (<span class="cls">Blueprint</span> $table) {
+      $table-><span class="fn">id</span>();
+      $table-><span class="fn">string</span>(<span class="str">'title'</span>);
+      $table-><span class="fn">date</span>(<span class="str">'due_date'</span>);
+      $table-><span class="fn">enum</span>(<span class="str">'priority'</span>, [<span class="str">'low'</span>, <span class="str">'medium'</span>, <span class="str">'high'</span>]);
+      $table-><span class="fn">enum</span>(<span class="str">'status'</span>, [<span class="str">'pending'</span>, <span class="str">'in_progress'</span>, <span class="str">'done'</span>])
+             -><span class="fn">default</span>(<span class="str">'pending'</span>);
+      $table-><span class="fn">timestamps</span>();
+      <span class="cm">// Enforce unique title per due_date at DB level</span>
+      $table-><span class="fn">unique</span>([<span class="str">'title'</span>, <span class="str">'due_date'</span>]);
+    });
+  }
+};</div>
+      </div>
+
+      <div class="setup-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h3>Create project</h3>
+            <p><span class="inline-code">composer create-project laravel/laravel task-management-api "^11.0"</span></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h3>Configure .env</h3>
+            <p>Set <span class="inline-code">DB_CONNECTION=mysql</span>, <span class="inline-code">DB_DATABASE</span>, <span class="inline-code">DB_USERNAME</span>, <span class="inline-code">DB_PASSWORD</span></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h3>Scaffold API routes</h3>
+            <p><span class="inline-code">php artisan install:api</span> — creates <span class="inline-code">routes/api.php</span> (new in Laravel 11)</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h3>Run migrations & seed</h3>
+            <p><span class="inline-code">php artisan migrate</span> then <span class="inline-code">php artisan db:seed --class=TaskSeeder</span></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <h3>Serve locally</h3>
+            <p><span class="inline-code">php artisan serve</span> — API available at <span class="inline-code">http://127.0.0.1:8000/api</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LIST TASKS ===== -->
+    <div id="section-ep-list" style="display:none">
+      <div class="endpoint-card active-section">
+        <div class="ep-header" onclick="toggleEp(this)">
+          <span class="ep-method" style="background:rgba(59,130,246,.15);color:#3b82f6">GET</span>
+          <span class="ep-path">/api/tasks</span>
+          <span class="ep-desc">List all tasks</span>
+          <span class="ep-chevron">▾</span>
+        </div>
+        <div class="ep-body open">
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this,'try-list')">Try it</div>
+            <div class="tab" onclick="switchTab(this,'rules-list')">Rules</div>
+          </div>
+          <div id="try-list">
+            <div class="field-group">
+              <div class="field">
+                <label>Status filter (optional)</label>
+                <select id="list-status">
+                  <option value="">— All statuses —</option>
+                  <option>pending</option>
+                  <option>in_progress</option>
+                  <option>done</option>
+                </select>
+              </div>
+            </div>
+            <button class="run-btn" onclick="runList()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Send Request
+            </button>
+            <div class="response-box" id="list-response" style="display:none">
+              <div class="response-header" id="list-resp-header"></div>
+              <div class="response-body" id="list-resp-body"></div>
+            </div>
+          </div>
+          <div id="rules-list" style="display:none">
+            <div class="rules">
+              <div class="rule"><span class="rule-icon">→</span>Sorted by priority: high → medium → low (using FIELD() in MySQL)</div>
+              <div class="rule"><span class="rule-icon">→</span>Then sorted by due_date ascending within each priority group</div>
+              <div class="rule"><span class="rule-icon">→</span>Optional <span class="inline-code" style="font-size:11px">?status=pending|in_progress|done</span> query parameter</div>
+              <div class="rule"><span class="rule-icon">→</span>Returns meaningful JSON message when no tasks exist</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CREATE TASK ===== -->
+    <div id="section-ep-create" style="display:none">
+      <div class="endpoint-card active-section">
+        <div class="ep-header" onclick="toggleEp(this)">
+          <span class="ep-method" style="background:rgba(34,197,94,.15);color:#22c55e">POST</span>
+          <span class="ep-path">/api/tasks</span>
+          <span class="ep-desc">Create a new task</span>
+          <span class="ep-chevron">▾</span>
+        </div>
+        <div class="ep-body open">
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this,'try-create')">Try it</div>
+            <div class="tab" onclick="switchTab(this,'schema-create')">Schema</div>
+            <div class="tab" onclick="switchTab(this,'rules-create')">Rules</div>
+          </div>
+          <div id="try-create">
+            <div class="field-group">
+              <div class="field">
+                <label>Title <span style="color:var(--c-red)">*</span></label>
+                <input id="c-title" type="text" placeholder="e.g. Fix login bug">
+              </div>
+              <div class="field-row">
+                <div class="field">
+                  <label>Due Date <span style="color:var(--c-red)">*</span></label>
+                  <input id="c-date" type="date">
+                </div>
+                <div class="field">
+                  <label>Priority <span style="color:var(--c-red)">*</span></label>
+                  <select id="c-priority">
+                    <option value="">— Select —</option>
+                    <option>low</option>
+                    <option>medium</option>
+                    <option>high</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button class="run-btn" onclick="runCreate()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Send Request
+            </button>
+            <div class="response-box" id="create-response" style="display:none">
+              <div class="response-header" id="create-resp-header"></div>
+              <div class="response-body" id="create-resp-body"></div>
+            </div>
+          </div>
+          <div id="schema-create" style="display:none">
+            <table class="schema-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rules</th></tr></thead>
+              <tbody>
+                <tr><td>title</td><td><span class="type-pill">string</span></td><td><span class="required-dot">•</span> yes</td><td>Max 255 chars. Must be unique per due_date.</td></tr>
+                <tr><td>due_date</td><td><span class="type-pill">date</span></td><td><span class="required-dot">•</span> yes</td><td>Format: YYYY-MM-DD. Must be today or future.</td></tr>
+                <tr><td>priority</td><td><span class="type-pill">enum</span></td><td><span class="required-dot">•</span> yes</td><td>One of: low, medium, high</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="rules-create" style="display:none">
+            <div class="rules">
+              <div class="rule"><span class="rule-icon">→</span>title + due_date must be unique (enforced at DB AND validation level)</div>
+              <div class="rule"><span class="rule-icon">→</span>due_date must be today or in the future (after_or_equal:today)</div>
+              <div class="rule"><span class="rule-icon">→</span>priority must be one of: low, medium, high</div>
+              <div class="rule"><span class="rule-icon">→</span>status is automatically set to pending on creation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== UPDATE STATUS ===== -->
+    <div id="section-ep-status" style="display:none">
+      <div class="endpoint-card active-section">
+        <div class="ep-header" onclick="toggleEp(this)">
+          <span class="ep-method" style="background:rgba(245,158,11,.15);color:#f59e0b">PATCH</span>
+          <span class="ep-path">/api/tasks/{id}/status</span>
+          <span class="ep-desc">Progress task status</span>
+          <span class="ep-chevron">▾</span>
+        </div>
+        <div class="ep-body open">
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this,'try-status')">Try it</div>
+            <div class="tab" onclick="switchTab(this,'rules-status')">Flow</div>
+          </div>
+          <div id="try-status">
+            <div style="margin-bottom:16px;padding:12px;background:var(--c-surface);border-radius:var(--radius);border:1px solid var(--c-border)">
+              <div style="font-size:11px;color:var(--c-muted);margin-bottom:8px">STATUS FLOW</div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:12px">
+                <span style="padding:4px 12px;background:rgba(245,158,11,.15);color:var(--c-amber);border-radius:4px">pending</span>
+                <span style="color:var(--c-muted)">→</span>
+                <span style="padding:4px 12px;background:rgba(59,130,246,.15);color:var(--c-blue);border-radius:4px">in_progress</span>
+                <span style="color:var(--c-muted)">→</span>
+                <span style="padding:4px 12px;background:rgba(34,197,94,.15);color:var(--c-green);border-radius:4px">done</span>
+              </div>
+            </div>
+            <div class="field-group">
+              <div class="field-row">
+                <div class="field">
+                  <label>Task ID <span style="color:var(--c-red)">*</span></label>
+                  <input id="s-id" type="number" placeholder="e.g. 1">
+                </div>
+                <div class="field">
+                  <label>New Status <span style="color:var(--c-red)">*</span></label>
+                  <select id="s-status">
+                    <option value="">— Select —</option>
+                    <option>in_progress</option>
+                    <option>done</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <button class="run-btn" onclick="runStatus()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Send Request
+            </button>
+            <div class="response-box" id="status-response" style="display:none">
+              <div class="response-header" id="status-resp-header"></div>
+              <div class="response-body" id="status-resp-body"></div>
+            </div>
+          </div>
+          <div id="rules-status" style="display:none">
+            <div class="rules">
+              <div class="rule"><span class="rule-icon">→</span>Status can ONLY progress forward: pending → in_progress → done</div>
+              <div class="rule"><span class="rule-icon">→</span>Cannot skip a step (e.g. pending → done is rejected)</div>
+              <div class="rule"><span class="rule-icon">→</span>Cannot revert (e.g. done → pending is rejected)</div>
+              <div class="rule"><span class="rule-icon">→</span>Once done, no further status changes are possible</div>
+              <div class="rule"><span class="rule-icon">→</span>Returns 422 with a clear message on invalid transitions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DELETE ===== -->
+    <div id="section-ep-delete" style="display:none">
+      <div class="endpoint-card active-section">
+        <div class="ep-header" onclick="toggleEp(this)">
+          <span class="ep-method" style="background:rgba(244,63,94,.15);color:#f43f5e">DELETE</span>
+          <span class="ep-path">/api/tasks/{id}</span>
+          <span class="ep-desc">Delete a done task</span>
+          <span class="ep-chevron">▾</span>
+        </div>
+        <div class="ep-body open">
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this,'try-delete')">Try it</div>
+            <div class="tab" onclick="switchTab(this,'rules-delete')">Rules</div>
+          </div>
+          <div id="try-delete">
+            <div class="field-group">
+              <div class="field">
+                <label>Task ID <span style="color:var(--c-red)">*</span></label>
+                <input id="d-id" type="number" placeholder="e.g. 4">
+              </div>
+            </div>
+            <div class="task-list" id="done-tasks-list"></div>
+            <button class="run-btn" style="margin-top:16px" onclick="runDelete()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+              Delete Task
+            </button>
+            <div class="response-box" id="delete-response" style="display:none">
+              <div class="response-header" id="delete-resp-header"></div>
+              <div class="response-body" id="delete-resp-body"></div>
+            </div>
+          </div>
+          <div id="rules-delete" style="display:none">
+            <div class="rules">
+              <div class="rule"><span class="rule-icon">→</span>Only tasks with status <strong style="color:var(--c-green)">done</strong> can be deleted</div>
+              <div class="rule"><span class="rule-icon">→</span>Attempting to delete a pending or in_progress task returns <span style="color:var(--c-red);font-family:var(--font-mono);font-size:11px">403 Forbidden</span></div>
+              <div class="rule"><span class="rule-icon">→</span>Non-existent task returns <span style="color:var(--c-amber);font-family:var(--font-mono);font-size:11px">404 Not Found</span></div>
+              <div class="rule"><span class="rule-icon">→</span>Returns 200 with success message on deletion</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REPORT ===== -->
+    <div id="section-ep-report" style="display:none">
+      <div class="endpoint-card active-section">
+        <div class="ep-header" onclick="toggleEp(this)">
+          <span class="ep-method" style="background:rgba(59,130,246,.15);color:#3b82f6">GET</span>
+          <span class="ep-path">/api/tasks/report</span>
+          <span class="ep-desc">Daily task report</span>
+          <span class="ep-chevron">▾</span>
+        </div>
+        <div class="ep-body open">
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab(this,'try-report')">Try it</div>
+            <div class="tab" onclick="switchTab(this,'rules-report')">Rules</div>
+          </div>
+          <div id="try-report">
+            <div class="field-group">
+              <div class="field">
+                <label>Date <span style="color:var(--c-red)">*</span></label>
+                <input id="r-date" type="date">
+              </div>
+            </div>
+            <button class="run-btn" onclick="runReport()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Generate Report
+            </button>
+            <div id="report-visual" style="display:none;margin-top:20px">
+              <div style="font-size:11px;color:var(--c-muted);margin-bottom:8px;font-family:var(--font-mono)" id="report-date-label"></div>
+              <div class="report-grid" id="report-grid"></div>
+            </div>
+            <div class="response-box" id="report-response" style="display:none;margin-top:16px">
+              <div class="response-header" id="report-resp-header"></div>
+              <div class="response-body" id="report-resp-body"></div>
+            </div>
+          </div>
+          <div id="rules-report" style="display:none">
+            <div class="rules">
+              <div class="rule"><span class="rule-icon">→</span>Requires <span class="inline-code" style="font-size:11px">?date=YYYY-MM-DD</span> query parameter</div>
+              <div class="rule"><span class="rule-icon">→</span>Returns counts grouped by priority (high/medium/low) × status (pending/in_progress/done)</div>
+              <div class="rule"><span class="rule-icon">→</span>Filters tasks by <span class="inline-code" style="font-size:11px">due_date</span> matching the given date</div>
+              <div class="rule"><span class="rule-icon">→</span>Always returns all 9 cells even if count is 0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ======= IN-MEMORY DATA STORE =======
+let tasks = [
+  {id:1,title:'Fix production bug',due_date:'2026-04-01',priority:'high',status:'in_progress',created_at:'2026-03-30T08:00:00Z',updated_at:'2026-03-30T09:00:00Z'},
+  {id:2,title:'Write unit tests',due_date:'2026-04-02',priority:'medium',status:'pending',created_at:'2026-03-30T08:00:00Z',updated_at:'2026-03-30T08:00:00Z'},
+  {id:3,title:'Update documentation',due_date:'2026-04-03',priority:'low',status:'pending',created_at:'2026-03-30T08:00:00Z',updated_at:'2026-03-30T08:00:00Z'},
+  {id:4,title:'Deploy to staging',due_date:'2026-04-01',priority:'high',status:'done',created_at:'2026-03-30T08:00:00Z',updated_at:'2026-03-31T10:00:00Z'},
+  {id:5,title:'Code review PR #42',due_date:'2026-04-02',priority:'medium',status:'pending',created_at:'2026-03-30T08:00:00Z',updated_at:'2026-03-30T08:00:00Z'},
+  {id:6,title:'Database backup check',due_date:'2026-04-01',priority:'low',status:'done',created_at:'2026-03-30T08:00:00Z',updated_at:'2026-03-31T11:00:00Z'},
+];
+let nextId = 7;
+
+const priorityOrder = {high:3,medium:2,low:1};
+const statusFlow = {pending:'in_progress',in_progress:'done'};
+
+// ======= NAV =======
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    item.classList.add('active');
+    const sec = item.dataset.section;
+    document.querySelectorAll('[id^="section-"]').forEach(s=>s.style.display='none');
+    const el = document.getElementById('section-'+sec);
+    if(el) el.style.display='block';
+    if(sec==='ep-delete') renderDoneList();
+  });
+});
+
+// ======= TABS =======
+function switchTab(tabEl,targetId){
+  const parent = tabEl.closest('.ep-body');
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tabEl.classList.add('active');
+  const allPanels = [targetId];
+  const tabs = parent.querySelectorAll('.tab');
+  tabs.forEach(t=>{
+    const tid = t.getAttribute('onclick').match(/'([^']+)'\)/)?.[1];
+    if(tid && tid!==targetId){
+      const el=document.getElementById(tid);
+      if(el)el.style.display='none';
+    }
+  });
+  const target=document.getElementById(targetId);
+  if(target)target.style.display='block';
+}
+
+function toggleEp(header){
+  const body=header.nextElementSibling;
+  const chevron=header.querySelector('.ep-chevron');
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  body.style.display=isOpen?'none':'block';
+  chevron.style.transform=isOpen?'rotate(-90deg)':'rotate(0deg)';
+}
+
+// ======= JSON HIGHLIGHT =======
+function highlight(json){
+  const str=JSON.stringify(json,null,2);
+  return str.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,match=>{
+    if(/^"/.test(match)){
+      if(/:$/.test(match)) return '<span class="json-key">'+match+'</span>';
+      return '<span class="json-str">'+match+'</span>';
+    }
+    if(/true|false/.test(match)) return '<span class="json-bool">'+match+'</span>';
+    if(/null/.test(match)) return '<span class="json-null">'+match+'</span>';
+    return '<span class="json-num">'+match+'</span>';
+  });
+}
+
+function showResponse(prefix,code,data,isError){
+  const box=document.getElementById(prefix+'-response');
+  const header=document.getElementById(prefix+'-resp-header');
+  const body=document.getElementById(prefix+'-resp-body');
+  box.style.display='block';
+  const cls=code>=200&&code<300?'status-2xx':'status-4xx';
+  const dotCls=code>=200&&code<300?'dot-green':code===403?'dot-amber':'dot-red';
+  header.innerHTML=`<span class="status-dot ${dotCls}"></span><span class="status-code ${cls}">${code}</span><span style="color:var(--c-muted);font-size:11px">${getStatusText(code)}</span><button class="copy-btn" onclick="copyJSON('${prefix}')">Copy</button>`;
+  body.innerHTML=highlight(data);
+}
+
+function getStatusText(c){return{200:'OK',201:'Created',403:'Forbidden',404:'Not Found',422:'Unprocessable Entity',200:'OK'}[c]||''}
+
+function copyJSON(prefix){
+  const body=document.getElementById(prefix+'-resp-body');
+  navigator.clipboard.writeText(body.innerText).catch(()=>{});
+  const btn=document.querySelector(`#${prefix}-response .copy-btn`);
+  btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);
+}
+
+function fakeDelay(fn,ms=400){return new Promise(r=>setTimeout(()=>r(fn()),ms+Math.random()*200))}
+
+function setLoading(btnEl,loading){
+  btnEl.classList.toggle('loading',loading);
+  btnEl.querySelector('svg').style.animation=loading?'spin .7s linear infinite':'';
+}
+
+// ======= SIMULATE: LIST =======
+async function runList(){
+  const btn=document.querySelector('#section-ep-list .run-btn');
+  setLoading(btn,true);
+  const status=document.getElementById('list-status').value;
+  await fakeDelay(()=>{
+    let result=[...tasks];
+    if(status) result=result.filter(t=>t.status===status);
+    result.sort((a,b)=>{
+      const pd=priorityOrder[b.priority]-priorityOrder[a.priority];
+      if(pd!==0)return pd;
+      return new Date(a.due_date)-new Date(b.due_date);
+    });
+    if(result.length===0){
+      showResponse('list',200,{message:'No tasks found.',tasks:[]});
+    } else {
+      showResponse('list',200,{message:'Tasks retrieved successfully.',count:result.length,tasks:result});
+    }
+  });
+  setLoading(btn,false);
+}
+
+// ======= SIMULATE: CREATE =======
+async function runCreate(){
+  const btn=document.querySelector('#section-ep-create .run-btn');
+  const title=document.getElementById('c-title').value.trim();
+  const date=document.getElementById('c-date').value;
+  const priority=document.getElementById('c-priority').value;
+  setLoading(btn,true);
+  await fakeDelay(()=>{
+    const errors={};
+    if(!title) errors.title=['The title field is required.'];
+    if(!date) errors.due_date=['The due date field is required.'];
+    else if(new Date(date)<new Date(new Date().toDateString())) errors.due_date=['The due date must be today or a future date.'];
+    if(!priority) errors.priority=['The priority field is required.'];
+    if(title&&date&&tasks.find(t=>t.title===title&&t.due_date===date)) errors.title=['A task with this title already exists on the same due date.'];
+    if(Object.keys(errors).length>0){
+      showResponse('create',422,{message:'Validation failed.',errors});
+      return;
+    }
+    const task={id:nextId++,title,due_date:date,priority,status:'pending',created_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+    tasks.push(task);
+    showResponse('create',201,{message:'Task created successfully.',task});
+  });
+  setLoading(btn,false);
+}
+
+// ======= SIMULATE: STATUS =======
+async function runStatus(){
+  const btn=document.querySelector('#section-ep-status .run-btn');
+  const id=parseInt(document.getElementById('s-id').value);
+  const newStatus=document.getElementById('s-status').value;
+  setLoading(btn,true);
+  await fakeDelay(()=>{
+    if(!id){showResponse('status',422,{message:'Validation failed.',errors:{id:['The id field is required.']}});return;}
+    const task=tasks.find(t=>t.id===id);
+    if(!task){showResponse('status',404,{message:'Task not found.'});return;}
+    if(!newStatus){showResponse('status',422,{message:'Validation failed.',errors:{status:['The status field is required.']}});return;}
+    const expected=statusFlow[task.status];
+    if(!expected){showResponse('status',422,{message:'This task is already marked as done. No further status changes allowed.'});return;}
+    if(newStatus!==expected){showResponse('status',422,{message:`Invalid status transition. Task is currently '${task.status}'. The only allowed next status is '${expected}'.`});return;}
+    task.status=newStatus;
+    task.updated_at=new Date().toISOString();
+    showResponse('status',200,{message:'Task status updated successfully.',task:{...task}});
+  });
+  setLoading(btn,false);
+}
+
+// ======= SIMULATE: DELETE =======
+function renderDoneList(){
+  const list=document.getElementById('done-tasks-list');
+  const done=tasks.filter(t=>t.status==='done');
+  if(done.length===0){list.innerHTML='<div class="empty-state">No done tasks to show</div>';return;}
+  list.innerHTML=done.map(t=>`
+    <div class="task-row" onclick="document.getElementById('d-id').value=${t.id}" style="cursor:pointer">
+      <span class="priority-dot pr-${t.priority}"></span>
+      <span class="task-title">#${t.id} · ${t.title}</span>
+      <span class="task-date">${t.due_date}</span>
+      <span class="task-status st-done">done</span>
+    </div>
+  `).join('');
+}
+
+async function runDelete(){
+  const btn=document.querySelector('#section-ep-delete .run-btn');
+  const id=parseInt(document.getElementById('d-id').value);
+  setLoading(btn,true);
+  await fakeDelay(()=>{
+    if(!id){showResponse('delete',422,{message:'Task ID is required.'});return;}
+    const idx=tasks.findIndex(t=>t.id===id);
+    if(idx===-1){showResponse('delete',404,{message:'Task not found.'});return;}
+    if(tasks[idx].status!=='done'){showResponse('delete',403,{message:'Forbidden. Only tasks with status "done" can be deleted.'});return;}
+    tasks.splice(idx,1);
+    renderDoneList();
+    showResponse('delete',200,{message:'Task deleted successfully.'});
+  });
+  setLoading(btn,false);
+}
+
+// ======= SIMULATE: REPORT =======
+async function runReport(){
+  const btn=document.querySelector('#section-ep-report .run-btn');
+  const date=document.getElementById('r-date').value;
+  setLoading(btn,true);
+  await fakeDelay(()=>{
+    if(!date){showResponse('report',422,{message:'Validation failed.',errors:{date:['The date field is required.']}});return;}
+    const filtered=tasks.filter(t=>t.due_date===date);
+    const summary={
+      high:{pending:0,in_progress:0,done:0},
+      medium:{pending:0,in_progress:0,done:0},
+      low:{pending:0,in_progress:0,done:0}
+    };
+    filtered.forEach(t=>summary[t.priority][t.status]++);
+    const result={date,summary};
+    showResponse('report',200,result);
+    renderReportVisual(date,summary);
+  });
+  setLoading(btn,false);
+}
+
+function renderReportVisual(date,summary){
+  document.getElementById('report-visual').style.display='block';
+  document.getElementById('report-date-label').textContent='Report for '+date;
+  const grid=document.getElementById('report-grid');
+  const priorities=['high','medium','low'];
+  const colors={high:'var(--c-red)',medium:'var(--c-amber)',low:'var(--c-green)'};
+  const statuses=['pending','in_progress','done'];
+  const statColors={pending:'var(--c-amber)',in_progress:'var(--c-blue)',done:'var(--c-green)'};
+  grid.innerHTML=priorities.map(p=>`
+    <div class="report-cell">
+      <div class="priority-label" style="color:${colors[p]}">${p}</div>
+      <div class="counts">
+        ${statuses.map(s=>`
+          <div class="count-row">
+            <span style="color:var(--c-muted)">${s.replace('_',' ')}</span>
+            <span class="count-val" style="color:${statColors[s]}">${summary[p][s]}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ======= INIT =======
+const today=new Date().toISOString().split('T')[0];
+document.getElementById('c-date').value=today;
+document.getElementById('c-date').min=today;
+document.getElementById('r-date').value=today;
+</script>
