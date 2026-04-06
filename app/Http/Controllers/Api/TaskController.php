@@ -114,6 +114,7 @@ class TaskController extends Controller
      * DELETE /api/tasks/{id}
      * Only tasks with status 'done' can be deleted.
      */
+
     public function destroy(int $id): JsonResponse
     {
         $task = Task::find($id);
