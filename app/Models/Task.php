@@ -25,6 +25,11 @@ class Task extends Model
         'medium' => 2,
         'low'    => 1,
     ];
+    public static array $statusOrder = [
+        'pending'     => 1,
+        'in_progress' => 2,
+        'done'        => 3,
+    ];
 
     /**
      * Valid status progression map
