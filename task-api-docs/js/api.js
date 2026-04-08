@@ -74,6 +74,11 @@ const Api = (() => {
   /* ── GET /api/tasks/report ──────────────────────────────── */
   async function getReport() {
     const btn  = document.getElementById('btn-report');
+    const date = document.getElementById('r-date').value; 
+    
+  }
+  async function getReport() {
+    const btn  = document.getElementById('btn-report');
     const date = document.getElementById('r-date').value;
 
     UI.setLoading(btn, true);
