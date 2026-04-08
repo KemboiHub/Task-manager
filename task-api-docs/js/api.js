@@ -85,6 +85,9 @@ const Api = (() => {
       if (result.code === 200) {
         UI.renderReportVisual(result.body.date, result.body.summary);
       }
+    });
+
+    UI.setLoading(btn, false);
   }
   async function getReport() {
     const btn  = document.getElementById('btn-report');
