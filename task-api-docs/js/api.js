@@ -81,6 +81,10 @@ const Api = (() => {
     await UI.fakeDelay(() => {
       const result = Store.getReport(date);
       UI.showResponse('report', result.code, result.body);
+
+      if (result.code === 200) {
+        UI.renderReportVisual(result.body.date, result.body.summary);
+      }
   }
   async function getReport() {
     const btn  = document.getElementById('btn-report');
