@@ -75,7 +75,12 @@ const Api = (() => {
   async function getReport() {
     const btn  = document.getElementById('btn-report');
     const date = document.getElementById('r-date').value; 
+
+    UI.setLoading(btn, true);
     
+    await UI.fakeDelay(() => {
+      const result = Store.getReport(date);
+      UI.showResponse('report', result.code, result.body);
   }
   async function getReport() {
     const btn  = document.getElementById('btn-report');
