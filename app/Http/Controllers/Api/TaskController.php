@@ -115,26 +115,7 @@ class TaskController extends Controller
      * Only tasks with status 'done' can be deleted.
      */
 
-    public function destroy(int $id): JsonResponse
-    {
-        $task = Task::find($id);
-
-        if (!$task) {
-            return response()->json(['message' => 'Task not found.'], 404);
-        }
-
-        if ($task->status !== 'done') {
-            return response()->json([
-                'message' => 'Forbidden. Only tasks with status "done" can be deleted.',
-            ], 403);
-        }
-
-        $task->delete();
-
-        return response()->json([
-            'message' => 'Task deleted successfully.',
-        ], 200);
-    }
+  
 
     /**
      * GET /api/tasks/report?date=YYYY-MM-DD
